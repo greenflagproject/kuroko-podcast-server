@@ -1,0 +1,5 @@
+PyYAML
+APScheduler
+eyeD3
+jinja2
+mutagen
