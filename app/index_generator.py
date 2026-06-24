@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 import os
 import pathlib
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from wsgiref.handlers import format_date_time
 import glob
 from dataclasses import dataclass
@@ -10,7 +11,6 @@ from jinja2 import Template, Environment, FileSystemLoader
 from typing import Any
 from email.utils import formatdate
 import hashlib
-from typing import Dict
 import urllib
 
 """
@@ -20,8 +20,6 @@ Envs:
   PCS_TEMPLATES_DIR     -- index.htmlとPodcast feedデータのテンプレート(例: /usr/src/app/templates/)
   PCS_AUDIO_ROOT_DIR    -- オーディオファイルのルートディレクトリ
 """
-
-timezone = timezone(timedelta(hours=9))
 
 @dataclass
 class FeedInfo:
@@ -53,6 +51,9 @@ class FileIO:
     thumbnail_dir_path = os.path.join(htdocs_dir_path, thumbnail_dir_name)
     default_thumbnail_url = os.path.join(app_root_url, thumbnail_dir_name, "music.png")
 
+    timezone= os.environ.get("PCS_TIMEZONE","Asia/Tokyo")
+    timezone_info = ZoneInfo(timezone)
+
     @staticmethod
     def get_channel_rss_list() -> list[FeedInfo]:
         # ファイルのフルパスの一覧を生成
@@ -70,10 +71,9 @@ class FileIO:
     @staticmethod
     def get_index_html_template() -> Template:
         #テンプレート読み込み
-        env = Environment(loader=FileSystemLoader(FileIO.templates_dir_path, encoding="utf8"))
+        env = Environment(loader=FileSystemLoader(FileIO.templates_dir_path, encoding="utf8"), autoescape=True)
         return env.get_template(FileIO.index_html_template_filename)
 
-class TemplateRenderer:
     @staticmethod
     def output_index_html(filename :str, html_text: str):
         html_file_path = os.path.join(FileIO.htdocs_dir_path, filename)
@@ -81,16 +81,17 @@ class TemplateRenderer:
         with open(html_file_path, "w") as f:
             f.write(html_text)
 
+class TemplateRenderer:
     @staticmethod
     def render_index_html(filename :str, feed_info_list: list[FeedInfo]):
-        feeds: list[Dict[str: Any]] = []
+        feeds: list[dict[str, str]] = []
         for feed_info in feed_info_list:
             feeds.append({
               "path": feed_info.url(),
               "title": feed_info.channel_name
             })
 
-        rendering_params = { "last_update_date": datetime.now(timezone), "feeds": feeds }
+        rendering_params = { "last_update_date": datetime.now(FileIO.timezone_info), "feeds": feeds }
 
         html = FileIO.get_index_html_template().render(rendering_params)
         FileIO.output_index_html(filename, html)
