@@ -9,7 +9,7 @@ ARG CRONTAB_SETTING_TEXT="0 6,18 * * *"
 ENV CRONTAB_SETTING_TEXT=$CRONTAB_SETTING_TEXT
 
 # Install python and pip
-RUN apt-get update && RUN apt-get install python3 python3-pip vim python3-setuptools -y -qq --no-install-recommends
+RUN apt-get update && apt-get install python3 python3-pip vim python3-setuptools -y -qq --no-install-recommends
 
 # copy applications
 COPY app/ /usr/src/app/

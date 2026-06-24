@@ -78,7 +78,7 @@ class FileIO:
     def output_index_html(filename :str, html_text: str):
         html_file_path = os.path.join(FileIO.htdocs_dir_path, filename)
 
-        with open(html_file_path, "w") as f:
+        with open(html_file_path, "w", encoding="utf-8") as f:
             f.write(html_text)
 
 class TemplateRenderer:
