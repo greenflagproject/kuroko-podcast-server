@@ -2,6 +2,17 @@
 
 set -eu
 
+cd /usr/local/apache2/
+if [ -e "ssl" ] || [ -L "ssl" ]; then
+    cp -f ssl/server.crt /usr/local/apache2/conf/server.crt
+    cp -f ssl/server.key /usr/local/apache2/conf/server.key
+    sed -i \
+        -e 's/^#\(Include .*httpd-ssl.conf\)/\1/' \
+        -e 's/^#\(LoadModule .*mod_ssl.so\)/\1/' \
+        -e 's/^#\(LoadModule .*mod_socache_shmcb.so\)/\1/' \
+        conf/httpd.conf
+fi
+
 cd /usr/local/apache2/htdocs/
 if [ ! -e "channels" ] && [ ! -L "channels" ]; then
     ln -s /volumes/channels channels

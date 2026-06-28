@@ -22,6 +22,7 @@ RUN pip install --no-cache-dir  --break-system-packages -r /usr/src/app/requirem
 COPY htdocs /usr/local/apache2/htdocs
 
 # tell the port number the container should expose
-EXPOSE 80
+ARG PORT=443
+EXPOSE $PORT
 
 CMD ["/usr/src/app/startup.sh"]
