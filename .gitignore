@@ -219,3 +219,8 @@ __marimo__/
 
 # Mac
 .DS_Store
+
+# Thisproject rules
+*.tar
+deploy.sh
+docker-compose.yml
